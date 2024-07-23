@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:camera_platform_interface/camera_platform_interface.dart';
 import 'package:flutter/services.dart';
 
@@ -13,6 +15,7 @@ CameraDescription cameraDescriptionFromPlatform(
   return CameraDescription(
       name: camera.name,
       lensDirection: cameraLensDirectionFromPlatform(camera.lensDirection),
+      deviceType: camera.deviceType,
       sensorOrientation: 90);
 }
 
@@ -25,6 +28,30 @@ CameraLensDirection cameraLensDirectionFromPlatform(
     PlatformCameraLensDirection.external => CameraLensDirection.external,
   };
 }
+
+/// Converts a Pigeon [PlatformFrameRateRange] to a [FrameRateRange].
+FrameRateRange frameRateRangeFromPlatform(PlatformFrameRateRange range) {
+  return FrameRateRange(
+    min: range.min,
+    max: range.max,
+  );
+}
+
+/// Converts a Pigeon [PlatformDeviceFormat] to a [DeviceFormat].
+DeviceFormat deviceFormatFromPlatform(PlatformDeviceFormat format) {
+  return DeviceFormat(
+    dimensions: Point<int>(format.dimensions.width, format.dimensions.height),
+    frameRateRanges: format.frameRateRanges
+        .map((PlatformFrameRateRange? c) => c!)
+        .map(frameRateRangeFromPlatform)
+        .toList(),
+    mediaType: format.mediaType,
+    mediaSubType: format.mediaSubType,
+    hdr: format.hdr,
+  );
+}
+
+/// Converts
 
 /// Convents the given device orientation to Pigeon.
 PlatformDeviceOrientation serializeDeviceOrientation(

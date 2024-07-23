@@ -28,6 +28,14 @@ Future<List<CameraDescription>> availableCameras() async {
   return CameraPlatform.instance.availableCameras();
 }
 
+/// Get available formats for the camera with the provided [CameraDescription].
+///
+/// May throw a [CameraException].
+Future<List<DeviceFormat>> availableCameraFormats(
+    CameraDescription cameraDescription) async {
+  return CameraPlatform.instance.getAvailableDeviceFormats(cameraDescription);
+}
+
 // TODO(stuartmorgan): Remove this once the package requires 2.10, where the
 // dart:async `unawaited` accepts a nullable future.
 void _unawaited(Future<void>? future) {}

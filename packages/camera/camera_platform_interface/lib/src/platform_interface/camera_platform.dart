@@ -11,6 +11,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import '../../camera_platform_interface.dart';
 import '../method_channel/method_channel_camera.dart';
+import '../types/frame_rate_range.dart';
 
 /// The interface that implementations of camera must implement.
 ///
@@ -304,5 +305,11 @@ abstract class CameraPlatform extends PlatformInterface {
   // https://github.com/flutter/flutter/issues/139588
   Future<void> setImageFileFormat(int cameraId, ImageFileFormat format) {
     throw UnimplementedError('setImageFileFormat() is not implemented.');
+  }
+
+  /// Gets the available device formats for a [CameraDescription].
+  Future<List<DeviceFormat>> getAvailableDeviceFormats(
+      CameraDescription description) {
+    throw UnimplementedError('getAvailableDeviceFormats() is not implemented.');
   }
 }

@@ -390,6 +390,20 @@ class AVFoundationCamera extends CameraPlatform {
   }
 
   @override
+  Future<List<DeviceFormat>> getAvailableDeviceFormats(
+      CameraDescription description) async {
+    try {
+      return (await _hostApi.getAvailableDeviceFormats(description.name))
+          // See comment in messages.dart for why this is safe.
+          .map((PlatformDeviceFormat? c) => c!)
+          .map(deviceFormatFromPlatform)
+          .toList();
+    } on PlatformException catch (e) {
+      throw CameraException(e.code, e.message);
+    }
+  }
+
+  @override
   Widget buildPreview(int cameraId) {
     return Texture(textureId: cameraId);
   }

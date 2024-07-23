@@ -7,9 +7,11 @@ export 'package:camera_platform_interface/camera_platform_interface.dart'
         CameraDescription,
         CameraException,
         CameraLensDirection,
+        DeviceFormat,
         ExposureMode,
         FlashMode,
         FocusMode,
+        FrameRateRange,
         ImageFormatGroup,
         ResolutionPreset,
         XFile;

@@ -64,10 +64,14 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   late Animation<double> _exposureModeControlRowAnimation;
   late AnimationController _focusModeControlRowAnimationController;
   late Animation<double> _focusModeControlRowAnimation;
+  late AnimationController _videoSettingsControlRowAnimationController;
+  late Animation<double> _videoSettingsControlRowAnimation;
   double _minAvailableZoom = 1.0;
   double _maxAvailableZoom = 1.0;
   double _currentScale = 1.0;
   double _baseScale = 1.0;
+  ResolutionPreset? _selectedResolutionPreset;
+  int? _selectedFrameRate;
 
   // Counting pointers (number of user fingers on screen)
   int _pointers = 0;
@@ -99,6 +103,16 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     );
     _focusModeControlRowAnimation = CurvedAnimation(
       parent: _focusModeControlRowAnimationController,
+      curve: Curves.easeInCubic,
+    );
+
+    _videoSettingsControlRowAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _videoSettingsControlRowAnimation = CurvedAnimation(
+      parent: _videoSettingsControlRowAnimationController,
       curve: Curves.easeInCubic,
     );
   }
@@ -308,11 +322,18 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                   ? onCaptureOrientationLockButtonPressed
                   : null,
             ),
+            IconButton(
+              icon: const Icon(Icons.video_settings),
+              color: Colors.blue,
+              onPressed:
+                  controller != null ? onVideoSettingsButtonPressed : null,
+            ),
           ],
         ),
         _flashModeControlRowWidget(),
         _exposureModeControlRowWidget(),
         _focusModeControlRowWidget(),
+        _videoSettingsControlRowWidget(),
       ],
     );
   }
@@ -505,6 +526,107 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     );
   }
 
+  onSetVideoResultionByDimension(Point<int> dimensions) {
+    if (controller != null) {
+      _selectedResolutionPreset = _dimensionsToPreset[dimensions];
+      _initializeCameraController(controller!.description);
+    }
+  }
+
+  onSetVideoResolutionPreset(ResolutionPreset resolutionPreset) {
+    if (controller != null) {
+      _selectedResolutionPreset = resolutionPreset;
+      _initializeCameraController(controller!.description);
+    }
+  }
+
+  onSetVideoFrameRate(int frameRate) {
+    if (controller != null) {
+      _selectedFrameRate = frameRate;
+      _initializeCameraController(controller!.description);
+    }
+  }
+
+  List<DeviceFormat>? availableFormatsAtResolution(
+      ResolutionPreset resolutionPreset) {
+    if (controller != null) {
+      return _availableDeviceFormats[controller!.description]
+          ?.where((DeviceFormat format) =>
+              format.dimensions ==
+              _resolutionPresetToDimensions[resolutionPreset])
+          .toList();
+    }
+    return null;
+  }
+
+  Widget _videoSettingsControlRowWidget() {
+    final List<Point<int>> uniqueDimensions =
+        (_availableDeviceFormats[controller?.description] ?? [])
+            .map((DeviceFormat e) => e.dimensions)
+            .toSet()
+            .where((Point<int> dimensions) =>
+                _supportedDimensions.contains(dimensions))
+            .toList();
+
+    return SizeTransition(
+      sizeFactor: _videoSettingsControlRowAnimation,
+      child: ClipRect(
+        child: ColoredBox(
+          color: Colors.grey.shade50,
+          child: Column(
+            children: <Widget>[
+              const Center(
+                child: Text('Video Settings'),
+              ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    if (uniqueDimensions.isEmpty)
+                      const Text('No device formats available')
+                    else
+                      ...uniqueDimensions.map((Point<int> dimensions) {
+                        return TextButton(
+                          onPressed: controller != null
+                              ? () => onSetVideoResultionByDimension(dimensions)
+                              : null,
+                          child: Text('${dimensions.x}x${dimensions.y}'),
+                        );
+                      }),
+                  ],
+                ),
+              ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    if (_selectedResolutionPreset != null)
+                      ...availableFormatsAtResolution(
+                              _selectedResolutionPreset!)!
+                          .map((DeviceFormat e) => e.frameRateRanges.first)
+                          .toSet()
+                          .map((FrameRateRange frameRate) {
+                        return TextButton(
+                          onPressed: controller != null
+                              ? () => onSetVideoFrameRate(frameRate.max.toInt())
+                              : null,
+                          child: Text('${frameRate.max} fps'),
+                        );
+                      })
+                    else
+                      const Text('No frame rates available'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Display the control bar with buttons to take pictures and record videos.
   Widget _captureControlRowWidget() {
     final CameraController? cameraController = controller;
@@ -637,9 +759,44 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Future<void> _initializeCameraController(
       CameraDescription cameraDescription) async {
+    int? fps = _selectedFrameRate;
+
+    final resolutionPreset = _selectedResolutionPreset ?? ResolutionPreset.high;
+
+    if (fps != null) {
+      print('Selected frame rate: $fps');
+      final availableDeviceFormatsAtResolution =
+          availableFormatsAtResolution(resolutionPreset);
+
+      print(
+          'Available device formats at resolution: $availableDeviceFormatsAtResolution');
+
+      if (availableDeviceFormatsAtResolution == null) {
+        fps = null;
+      } else {
+        final bool isFrameRateSupported =
+            availableDeviceFormatsAtResolution.any((DeviceFormat format) =>
+                format.frameRateRanges.any((FrameRateRange range) =>
+                    range.max >= fps! && range.min <= fps));
+
+        if (!isFrameRateSupported) {
+          final nearestFrameRate = availableDeviceFormatsAtResolution
+              .expand((DeviceFormat format) => format.frameRateRanges)
+              .map((FrameRateRange range) => range.max)
+              .reduce((double a, double b) =>
+                  (a - fps!).abs() < (b - fps).abs() ? a : b)
+              .toInt();
+          fps = nearestFrameRate;
+        }
+      }
+    }
+
+    print('Initializing camera controller with selected frame rate: $fps');
+
     final CameraController cameraController = CameraController(
       cameraDescription,
-      kIsWeb ? ResolutionPreset.max : ResolutionPreset.medium,
+      resolutionPreset,
+      fps: fps,
       enableAudio: enableAudio,
       imageFormatGroup: ImageFormatGroup.jpeg,
     );
@@ -673,8 +830,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             .then((double value) => _maxAvailableZoom = value),
         CameraPlatform.instance
             .getMinZoomLevel(cameraController.cameraId)
-            .then((double value) => _minAvailableZoom = value),
+            .then((double value) => _minAvailableZoom = value)
       ]);
+
+      if (_availableDeviceFormats[cameraController.description]?.isEmpty ??
+          true) {
+        _availableDeviceFormats[cameraController.description] =
+            await CameraPlatform.instance
+                .getAvailableDeviceFormats(cameraController.description);
+      }
     } on CameraException catch (e) {
       switch (e.code) {
         case 'CameraAccessDenied':
@@ -729,6 +893,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       _flashModeControlRowAnimationController.forward();
       _exposureModeControlRowAnimationController.reverse();
       _focusModeControlRowAnimationController.reverse();
+      _videoSettingsControlRowAnimationController.reverse();
     }
   }
 
@@ -739,6 +904,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       _exposureModeControlRowAnimationController.forward();
       _flashModeControlRowAnimationController.reverse();
       _focusModeControlRowAnimationController.reverse();
+      _videoSettingsControlRowAnimationController.reverse();
     }
   }
 
@@ -749,6 +915,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       _focusModeControlRowAnimationController.forward();
       _flashModeControlRowAnimationController.reverse();
       _exposureModeControlRowAnimationController.reverse();
+      _videoSettingsControlRowAnimationController.reverse();
     }
   }
 
@@ -774,6 +941,17 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       }
     } on CameraException catch (e) {
       _showCameraException(e);
+    }
+  }
+
+  void onVideoSettingsButtonPressed() {
+    if (_videoSettingsControlRowAnimationController.value == 1) {
+      _videoSettingsControlRowAnimationController.reverse();
+    } else {
+      _videoSettingsControlRowAnimationController.forward();
+      _flashModeControlRowAnimationController.reverse();
+      _exposureModeControlRowAnimationController.reverse();
+      _focusModeControlRowAnimationController.reverse();
     }
   }
 
@@ -1055,6 +1233,28 @@ class CameraApp extends StatelessWidget {
 }
 
 List<CameraDescription> _cameras = <CameraDescription>[];
+Map<CameraDescription, List<DeviceFormat>> _availableDeviceFormats =
+    <CameraDescription, List<DeviceFormat>>{};
+
+final Map<Point<int>, ResolutionPreset> _dimensionsToPreset =
+    <Point<int>, ResolutionPreset>{
+  const Point<int>(3840, 2160): ResolutionPreset.ultraHigh,
+  const Point<int>(1920, 1080): ResolutionPreset.veryHigh,
+  const Point<int>(1280, 720): ResolutionPreset.high,
+};
+
+const List<Point<int>> _supportedDimensions = <Point<int>>[
+  Point<int>(3840, 2160),
+  Point<int>(1920, 1080),
+  Point<int>(1280, 720),
+];
+
+final Map<ResolutionPreset, Point<int>> _resolutionPresetToDimensions =
+    <ResolutionPreset, Point<int>>{
+  ResolutionPreset.ultraHigh: const Point<int>(3840, 2160),
+  ResolutionPreset.veryHigh: const Point<int>(1920, 1080),
+  ResolutionPreset.high: const Point<int>(1280, 720),
+};
 
 Future<void> main() async {
   // Fetch the available cameras before initializing the app.

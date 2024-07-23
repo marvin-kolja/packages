@@ -174,6 +174,7 @@ class CameraController extends ValueNotifier<CameraValue> {
   factory CameraController(
     CameraDescription cameraDescription,
     ResolutionPreset resolutionPreset, {
+    int? fps,
     bool enableAudio = true,
     ImageFormatGroup? imageFormatGroup,
   }) =>
@@ -182,6 +183,7 @@ class CameraController extends ValueNotifier<CameraValue> {
         mediaSettings: MediaSettings(
           resolutionPreset: resolutionPreset,
           enableAudio: enableAudio,
+          fps: fps,
         ),
         imageFormatGroup: imageFormatGroup,
       );

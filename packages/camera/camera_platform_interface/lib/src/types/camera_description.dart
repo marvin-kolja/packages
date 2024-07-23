@@ -24,6 +24,7 @@ class CameraDescription {
     required this.name,
     required this.lensDirection,
     required this.sensorOrientation,
+    this.deviceType,
   });
 
   /// The name of the camera device.
@@ -40,6 +41,15 @@ class CameraDescription {
   /// On Android, also defines the direction of rolling shutter readout, which
   /// is from top to bottom in the sensor's coordinate system.
   final int sensorOrientation;
+
+  /// The type of the camera device.
+  ///
+  /// This is an optional field and may be `null` if the device type is unknown
+  /// or not supported.
+  ///
+  /// **iOS only:**
+  /// Represents the [AVCaptureDeviceType] of the camera device.
+  final String? deviceType;
 
   @override
   bool operator ==(Object other) =>

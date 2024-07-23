@@ -84,6 +84,7 @@ class PlatformCameraDescription {
   PlatformCameraDescription({
     required this.name,
     required this.lensDirection,
+    required this.deviceType,
   });
 
   /// The name of the camera device.
@@ -91,6 +92,37 @@ class PlatformCameraDescription {
 
   /// The direction the camera is facing.
   final PlatformCameraLensDirection lensDirection;
+
+  /// The type of the camera device.
+  final String deviceType;
+}
+
+// Pigeon version of FrameRateRange.
+class PlatformFrameRateRange {
+  PlatformFrameRateRange({
+    required this.min,
+    required this.max,
+  });
+
+  final double min;
+  final double max;
+}
+
+// Pigeon version of DeviceFormat.
+class PlatformDeviceFormat {
+  PlatformDeviceFormat({
+    required this.dimensions,
+    required this.frameRateRanges,
+    required this.mediaType,
+    required this.mediaSubType,
+    required this.hdr,
+  });
+
+  final PlatformVideoDimensions dimensions;
+  final List<PlatformFrameRateRange?> frameRateRanges;
+  final String mediaType;
+  final String mediaSubType;
+  final bool hdr;
 }
 
 // Pigeon version of the data needed for a CameraInitializedEvent.
@@ -134,6 +166,14 @@ class PlatformMediaSettings {
   final int? videoBitrate;
   final int? audioBitrate;
   final bool enableAudio;
+}
+
+// Pigeon version of CMVideoDimensions
+class PlatformVideoDimensions {
+  PlatformVideoDimensions({required this.width, required this.height});
+
+  final int width;
+  final int height;
 }
 
 // Pigeon equivalent of CGPoint.
@@ -307,6 +347,10 @@ abstract class CameraApi {
   @async
   @ObjCSelector('setImageFileFormat:')
   void setImageFileFormat(PlatformImageFileFormat format);
+
+  @async
+  @ObjCSelector('getAvailableDeviceFormats:')
+  List<PlatformDeviceFormat> getAvailableDeviceFormats(String cameraName);
 }
 
 /// Handler for native callbacks that are not tied to a specific camera ID.

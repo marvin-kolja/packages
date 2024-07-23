@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../../camera_platform_interface.dart';
+import '../types/frame_rate_range.dart';
 import '../utils/utils.dart';
 import 'type_conversion.dart';
 
@@ -538,6 +540,23 @@ class MethodChannelCamera extends CameraPlatform {
         'fileFormat': format.name,
       },
     );
+  }
+
+  @override
+  Future<List<DeviceFormat>> getAvailableDeviceFormats(
+      CameraDescription description) async {
+    if (!Platform.isIOS && !Platform.isMacOS) {
+      throw UnimplementedError(
+          'getAvailableFormats is only available on iOS and macOS.');
+    }
+
+    final List<DeviceFormat>? formats =
+        await _channel.invokeListMethod<DeviceFormat>(
+      'getAvailableFormats',
+      <String, dynamic>{'cameraName': description.name},
+    );
+
+    return formats!;
   }
 
   @override

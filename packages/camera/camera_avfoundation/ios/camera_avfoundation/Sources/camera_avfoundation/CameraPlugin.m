@@ -132,7 +132,8 @@ static FlutterError *FlutterErrorFromNSError(NSError *error) {
           break;
       }
       [reply addObject:[FCPPlatformCameraDescription makeWithName:device.uniqueID
-                                                    lensDirection:lensFacing]];
+                                                    lensDirection:lensFacing
+                                                       deviceType:device.deviceType]];
     }
     completion(reply, nil);
   });
@@ -281,6 +282,49 @@ static FlutterError *FlutterErrorFromNSError(NSError *error) {
   __weak typeof(self) weakSelf = self;
   dispatch_async(self.captureSessionQueue, ^{
     completion(@(weakSelf.camera.maximumAvailableZoomFactor), nil);
+  });
+}
+
+- (void)getAvailableDeviceFormats:(nonnull NSString *)cameraName
+                       completion:(nonnull void (^)(NSArray<FCPPlatformDeviceFormat *> *_Nullable,
+                                                    FlutterError *_Nullable))completion {
+  __weak typeof(self) weakSelf = self;
+  dispatch_async(self.captureSessionQueue, ^{
+    AVCaptureDevice *device = [AVCaptureDevice deviceWithUniqueID:cameraName];
+    NSArray<AVCaptureDeviceFormat *> *formats = device.formats;
+    NSMutableArray<FCPPlatformDeviceFormat *> *reply =
+        [[NSMutableArray alloc] initWithCapacity:formats.count];
+    for (AVCaptureDeviceFormat *format in formats) {
+      CMVideoDimensions dimension = CMVideoFormatDescriptionGetDimensions(format.formatDescription);
+      NSArray<AVFrameRateRange *> *frameRateRanges = format.videoSupportedFrameRateRanges;
+      NSMutableArray<FCPPlatformFrameRateRange *> *parsedFrameRateRanges =
+          [[NSMutableArray alloc] initWithCapacity:frameRateRanges.count];
+      for (AVFrameRateRange *frameRateRange in frameRateRanges) {
+        FCPPlatformFrameRateRange *range =
+            [FCPPlatformFrameRateRange makeWithMin:frameRateRange.minFrameRate
+                                               max:frameRateRange.maxFrameRate];
+        [parsedFrameRateRanges addObject:range];
+      }
+
+      NSLog(@"format: %@", format);
+
+      CMMediaType mediaType = CMFormatDescriptionGetMediaType(format.formatDescription);
+      NSString *mediaTypeString = mediaType == kCMMediaType_Video ? @"video" : @"audio";
+      FourCharCode mediaSubType = CMFormatDescriptionGetMediaSubType(format.formatDescription);
+      NSString *mediaSubTypeString = @"";
+
+      // TODO: add FCPPlatformDeviceFormat
+      FCPPlatformDeviceFormat *parsedFormat = [FCPPlatformDeviceFormat
+          makeWithDimensions:[FCPPlatformVideoDimensions makeWithWidth:dimension.width
+                                                                height:dimension.height]
+             frameRateRanges:parsedFrameRateRanges
+                   mediaType:mediaTypeString
+                mediaSubType:mediaSubTypeString
+                         hdr:format.isVideoHDRSupported];
+
+      [reply addObject:parsedFormat];
+    }
+    completion(reply, nil);
   });
 }
 
