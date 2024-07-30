@@ -1497,6 +1497,60 @@ NSString *const errorMethod = @"error";
   }
 }
 
+- (void)listenToAdjustingFocus:(BOOL)listen {
+  if (listen) {
+    [_captureDevice addObserver:self
+                     forKeyPath:@"adjustingFocus"
+                        options:NSKeyValueObservingOptionNew
+                        context:nil];
+    [_captureDevice addObserver:self
+                     forKeyPath:@"lensPosition"
+                        options:NSKeyValueObservingOptionNew
+                        context:nil];
+  } else {
+    [_captureDevice removeObserver:self forKeyPath:@"adjustingFocus"];
+    [_captureDevice removeObserver:self forKeyPath:@"lensPosition"];
+  }
+}
+
+CGFloat _lastLensPosition = 0.0;
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary<NSKeyValueChangeKey, id> *)change
+                       context:(void *)context {
+  if (object == _captureDevice) {
+    if ([keyPath isEqualToString:@"adjustingFocus"]) {
+      BOOL adjustingFocus = [change[NSKeyValueChangeNewKey] boolValue];
+      [self reportAdjustingFocusChanged:adjustingFocus];
+    } else if ([keyPath isEqualToString:@"lensPosition"]) {
+      CGFloat lensPosition = [change[NSKeyValueChangeNewKey] floatValue];
+      BOOL drasticChange = NO;
+
+      // TODO: adjust this to have a more sophisticated algorithm to detect drastic changes
+      double lensPositionChange = fabs(lensPosition - _lastLensPosition);
+      const double lensPositionChangeThreshold = 0.05;
+
+      if (lensPositionChange > lensPositionChangeThreshold) {
+        _lastLensPosition = lensPosition;
+        drasticChange = YES;
+      } else {
+        drasticChange = NO;
+      }
+
+      BOOL isAdjustingFocus = _captureDevice.isAdjustingFocus;
+
+      if (isAdjustingFocus || drasticChange) {
+        [self reportAdjustingFocusChanged:YES];
+      } else {
+        [self reportAdjustingFocusChanged:NO];
+      }
+    }
+  } else {
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+  }
+}
+
 - (void)reportErrorMessage:(NSString *)errorMessage {
   __weak typeof(self) weakSelf = self;
   FLTEnsureToRunOnMainQueue(^{
@@ -1504,6 +1558,16 @@ NSString *const errorMethod = @"error";
                        completion:^(FlutterError *error){
                            // Ignore any errors, as this is just an event broadcast.
                        }];
+  });
+}
+
+- (void)reportAdjustingFocusChanged:(BOOL)currentlyFocusing {
+  __weak typeof(self) weakSelf = self;
+  FLTEnsureToRunOnMainQueue(^{
+    [weakSelf.dartAPI focusingChanged:currentlyFocusing
+                           completion:^(FlutterError *error){
+                               // Ignore any errors, as this is just an event broadcast.
+                           }];
   });
 }
 

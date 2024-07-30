@@ -879,6 +879,13 @@ class CameraController extends ValueNotifier<CameraValue> {
     }
   }
 
+  /// Stream of if the camera is currently focusing.
+  Stream<bool> cameraFocusingStream() {
+    return CameraPlatform.instance
+        .onCameraFocusing(_cameraId)
+        .map((CameraFocusingEvent event) => event.currentlyFocusing);
+  }
+
   /// Releases the resources of this camera.
   @override
   Future<void> dispose() async {

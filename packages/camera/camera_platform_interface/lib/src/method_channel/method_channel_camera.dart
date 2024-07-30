@@ -655,6 +655,12 @@ class MethodChannelCamera extends CameraPlatform {
           cameraId,
           arguments['description']! as String,
         ));
+      case 'focusing':
+        final Map<String, Object?> arguments = _getArgumentDictionary(call);
+        cameraEventStreamController.add(CameraFocusingEvent(
+          cameraId,
+          arguments['currentlyFocusing']! as bool,
+        ));
       default:
         throw MissingPluginException();
     }

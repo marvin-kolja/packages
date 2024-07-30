@@ -459,6 +459,7 @@ static FlutterError *FlutterErrorFromNSError(NSError *error) {
   [_registry unregisterTexture:cameraId];
   __weak typeof(self) weakSelf = self;
   dispatch_async(self.captureSessionQueue, ^{
+    [weakSelf.camera listenToAdjustingFocus:NO];
     [weakSelf.camera close];
     weakSelf.camera = nil;
     completion(nil);
@@ -490,6 +491,7 @@ static FlutterError *FlutterErrorFromNSError(NSError *error) {
          messageChannelSuffix:[NSString stringWithFormat:@"%ld", cameraId]];
   [_camera reportInitializationState];
   [self sendDeviceOrientation:[UIDevice currentDevice].orientation];
+  [_camera listenToAdjustingFocus:YES];
   [_camera start];
   completion(nil);
 }

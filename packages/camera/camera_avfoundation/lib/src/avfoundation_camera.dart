@@ -174,6 +174,11 @@ class AVFoundationCamera extends CameraPlatform {
   }
 
   @override
+  Stream<CameraFocusingEvent> onCameraFocusing(int cameraId) {
+    return _cameraEvents(cameraId).whereType<CameraFocusingEvent>();
+  }
+
+  @override
   Stream<DeviceOrientationChangedEvent> onDeviceOrientationChanged() {
     return hostHandler.deviceEventStreamController.stream
         .whereType<DeviceOrientationChangedEvent>();
@@ -606,6 +611,14 @@ class HostCameraMessageHandler implements CameraEventApi {
       initialState.exposurePointSupported,
       focusModeFromPlatform(initialState.focusMode),
       initialState.focusPointSupported,
+    ));
+  }
+
+  @override
+  void focusingChanged(bool currentlyFocusing) {
+    streamController.add(CameraFocusingEvent(
+      cameraId,
+      currentlyFocusing,
     ));
   }
 }

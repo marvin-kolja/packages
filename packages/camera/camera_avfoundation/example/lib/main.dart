@@ -73,6 +73,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   ResolutionPreset? _selectedResolutionPreset;
   int? _selectedFrameRate;
 
+  bool _isFocusing = false;
+
   // Counting pointers (number of user fingers on screen)
   int _pointers = 0;
 
@@ -812,6 +814,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
     try {
       await cameraController.initialize();
+
+      cameraController.cameraFocusingStream().listen((bool isFocusing) {
+        if (_isFocusing == isFocusing) {
+          return;
+        }
+        _isFocusing = isFocusing;
+        setState(() {});
+      });
+
       await Future.wait(<Future<Object?>>[
         // The exposure mode is currently not supported on the web.
         ...!kIsWeb

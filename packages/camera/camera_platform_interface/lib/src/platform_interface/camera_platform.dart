@@ -11,7 +11,6 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import '../../camera_platform_interface.dart';
 import '../method_channel/method_channel_camera.dart';
-import '../types/frame_rate_range.dart';
 
 /// The interface that implementations of camera must implement.
 ///
@@ -107,6 +106,11 @@ abstract class CameraPlatform extends PlatformInterface {
   /// The camera finished recording a video.
   Stream<VideoRecordedEvent> onVideoRecordedEvent(int cameraId) {
     throw UnimplementedError('onCameraTimeLimitReached() is not implemented.');
+  }
+
+  /// The camera changes focus.
+  Stream<CameraFocusingEvent> onCameraFocusing(int cameraId) {
+    throw UnimplementedError('onCameraFocusing() is not implemented.');
   }
 
   /// The ui orientation changed.

@@ -355,6 +355,9 @@ NSObject<FlutterMessageCodec> *FCPCameraEventApiGetCodec(void);
 /// This should be used for errors that occur outside of the context of
 /// handling a specific HostApi call, such as during streaming.
 - (void)reportError:(NSString *)message completion:(void (^)(FlutterError *_Nullable))completion;
+/// Called when the camera is currently focusing or not.
+- (void)focusingChanged:(BOOL)currentlyFocusing
+             completion:(void (^)(FlutterError *_Nullable))completion;
 @end
 
 NS_ASSUME_NONNULL_END

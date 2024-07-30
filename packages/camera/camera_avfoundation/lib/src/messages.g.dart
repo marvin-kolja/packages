@@ -1344,6 +1344,9 @@ abstract class CameraEventApi {
   /// handling a specific HostApi call, such as during streaming.
   void error(String message);
 
+  /// Called when the camera is currently focusing or not.
+  void focusingChanged(bool currentlyFocusing);
+
   static void setUp(
     CameraEventApi? api, {
     BinaryMessenger? binaryMessenger,
@@ -1398,6 +1401,34 @@ abstract class CameraEventApi {
               'Argument for dev.flutter.pigeon.camera_avfoundation.CameraEventApi.error was null, expected non-null String.');
           try {
             api.error(arg_message!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+                error: PlatformException(code: 'error', message: e.toString()));
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> __pigeon_channel = BasicMessageChannel<
+              Object?>(
+          'dev.flutter.pigeon.camera_avfoundation.CameraEventApi.focusingChanged$messageChannelSuffix',
+          pigeonChannelCodec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        __pigeon_channel.setMessageHandler(null);
+      } else {
+        __pigeon_channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+              'Argument for dev.flutter.pigeon.camera_avfoundation.CameraEventApi.focusingChanged was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final bool? arg_currentlyFocusing = (args[0] as bool?);
+          assert(arg_currentlyFocusing != null,
+              'Argument for dev.flutter.pigeon.camera_avfoundation.CameraEventApi.focusingChanged was null, expected non-null bool.');
+          try {
+            api.focusingChanged(arg_currentlyFocusing!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

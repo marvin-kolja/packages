@@ -16,7 +16,6 @@ import 'package:pigeon/pigeon.dart';
   ),
   copyrightHeader: 'pigeons/copyright.txt',
 ))
-
 // Pigeon version of CameraLensDirection.
 enum PlatformCameraLensDirection {
   /// Front facing camera (a user looking at the screen is seen by the camera).
@@ -375,4 +374,8 @@ abstract class CameraEventApi {
   /// handling a specific HostApi call, such as during streaming.
   @ObjCSelector('reportError:')
   void error(String message);
+
+  /// Called when the camera is currently focusing or not.
+  @ObjCSelector('focusingChanged:')
+  void focusingChanged(bool currentlyFocusing);
 }

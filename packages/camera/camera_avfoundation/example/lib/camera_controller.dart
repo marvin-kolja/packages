@@ -476,6 +476,13 @@ class CameraController extends ValueNotifier<CameraValue> {
       super.removeListener(listener);
     }
   }
+
+  /// Stream of if the camera is currently focusing.
+  Stream<bool> cameraFocusingStream() {
+    return CameraPlatform.instance
+        .onCameraFocusing(_cameraId)
+        .map((CameraFocusingEvent event) => event.currentlyFocusing);
+  }
 }
 
 /// A value that might be absent.

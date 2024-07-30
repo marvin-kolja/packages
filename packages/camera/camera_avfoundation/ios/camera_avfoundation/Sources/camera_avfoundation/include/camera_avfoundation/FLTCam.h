@@ -115,6 +115,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setZoomLevel:(CGFloat)zoom withCompletion:(void (^)(FlutterError *_Nullable))completion;
 - (void)setUpCaptureSessionForAudio;
 
+- (void)listenToAdjustingFocus:(BOOL)listen;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/foundation.dart' show immutable;
 
 import '../../camera_platform_interface.dart';
@@ -283,4 +285,39 @@ class VideoRecordedEvent extends CameraEvent {
 
   @override
   int get hashCode => Object.hash(super.hashCode, file, maxVideoDuration);
+}
+
+/// An event fired when the camera is currently focusing or has finished
+/// focusing.
+class CameraFocusingEvent extends CameraEvent {
+  /// Build a CameraFocusingEvent triggered from the camera with the `cameraId`.
+
+  const CameraFocusingEvent(super.cameraId, this.currentlyFocusing);
+
+  /// Converts the supplied [Map] to an instance of the [CameraFocusingEvent]
+  /// class.
+  CameraFocusingEvent.fromJson(Map<String, dynamic> json)
+      : currentlyFocusing = json['currentlyFocusing']! as bool,
+        super(json['cameraId']! as int);
+
+  /// Whether the camera is currently focusing.
+  final bool currentlyFocusing;
+
+  /// Converts the [CameraFocusingEvent] instance into a [Map] instance that
+  /// can be serialized to JSON.
+  Map<String, dynamic> toJson() => <String, Object?>{
+        'cameraId': cameraId,
+        'currentlyFocusing': currentlyFocusing,
+      };
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      super == other &&
+          other is CameraFocusingEvent &&
+          runtimeType == other.runtimeType &&
+          currentlyFocusing == other.currentlyFocusing;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, currentlyFocusing);
 }
