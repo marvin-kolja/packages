@@ -228,33 +228,6 @@ NSString *const errorMethod = @"error";
         return nil;
       }
 
-      NSArray<AVFrameRateRange *> *frameRateRanges =
-          _captureDevice.activeFormat.videoSupportedFrameRateRanges;
-
-      // Check if the frame rate is supported by the active format.
-      BOOL frameRateSupported = NO;
-      for (AVFrameRateRange *range in frameRateRanges) {
-        if (range.minFrameRate <= [_mediaSettings.framesPerSecond doubleValue] &&
-            [_mediaSettings.framesPerSecond doubleValue] <= range.maxFrameRate) {
-          frameRateSupported = YES;
-          break;
-        }
-      }
-
-      if (!frameRateSupported) {
-        if (error != nil) {
-          *error = [NSError errorWithDomain:NSCocoaErrorDomain
-                                       code:NSURLErrorUnknown
-                                   userInfo:@{
-                                     NSLocalizedDescriptionKey :
-                                         @"The frame rate is not supported by the active format."
-                                   }];
-        }
-        [_videoCaptureSession commitConfiguration];
-        [_captureDevice unlockForConfiguration];
-        return nil;
-      }
-
       // Set frame rate with 1/10 precision allowing not integral values.
       int fpsNominator = floor([_mediaSettings.framesPerSecond doubleValue] * 10.0);
       CMTime duration = CMTimeMake(10, fpsNominator);
