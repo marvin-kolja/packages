@@ -27,12 +27,12 @@ dependencies:
     git:
       url: git@github.com:marvin-kolja/packages.git
       path: packages/camera/camera_android_camerax
-      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
+      ref: '6c4b0b2bc2757b9dcfb526cd52a4633d0596a38a'
   camera_avfoundation:
     git:
       url: git@github.com:marvin-kolja/packages.git
       path: packages/camera/camera_avfoundation
-      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
+      ref: '6c4b0b2bc2757b9dcfb526cd52a4633d0596a38a'
   camera_platform_interface:
     git:
       url: git@github.com:marvin-kolja/packages.git
@@ -42,7 +42,7 @@ dependencies:
     git:
       url: git@github.com:marvin-kolja/packages.git
       path: packages/camera/camera_web
-      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
+      ref: '6c4b0b2bc2757b9dcfb526cd52a4633d0596a38a'
   flutter:
     sdk: flutter
   flutter_plugin_android_lifecycle: ^2.0.2
