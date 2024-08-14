@@ -18,8 +18,14 @@ flutter:
         pluginClass: CameraPlugin
         dartPluginClass: AndroidCamera
 
+publish_to: 'none'
+
 dependencies:
-  camera_platform_interface: ^2.6.0
+  camera_platform_interface:
+    git:
+      url: git@github.com:marvin-kolja/packages.git
+      path: packages/camera/camera_platform_interface
+      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
   flutter:
     sdk: flutter
   flutter_plugin_android_lifecycle: ^2.0.2

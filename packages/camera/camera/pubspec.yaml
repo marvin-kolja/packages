@@ -20,24 +20,32 @@ flutter:
       web:
         default_package: camera_web
 
+publish_to: 'none'
+
 dependencies:
-  camera_android_camerax: ^0.6.5
-  camera_avfoundation: ^0.9.15
-  camera_platform_interface: ^2.6.0
-  camera_web: ^0.3.3
+  camera_android_camerax:
+    git:
+      url: git@github.com:marvin-kolja/packages.git
+      path: packages/camera/camera_android_camerax
+      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
+  camera_avfoundation:
+    git:
+      url: git@github.com:marvin-kolja/packages.git
+      path: packages/camera/camera_avfoundation
+      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
+  camera_platform_interface:
+    git:
+      url: git@github.com:marvin-kolja/packages.git
+      path: packages/camera/camera_platform_interface
+      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
+  camera_web:
+    git:
+      url: git@github.com:marvin-kolja/packages.git
+      path: packages/camera/camera_web
+      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
   flutter:
     sdk: flutter
   flutter_plugin_android_lifecycle: ^2.0.2
-
-dependency_overrides:
-  camera_android_camerax:
-    path: ../camera_android_camerax
-  camera_avfoundation:
-    path: ../camera_avfoundation
-  camera_platform_interface:
-    path: ../camera_platform_interface
-  camera_web:
-    path: ../camera_web
 
 dev_dependencies:
   flutter_test:

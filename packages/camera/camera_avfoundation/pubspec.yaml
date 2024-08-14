@@ -16,15 +16,17 @@ flutter:
         pluginClass: CameraPlugin
         dartPluginClass: AVFoundationCamera
 
+publish_to: 'none'
+
 dependencies:
-  camera_platform_interface: ^2.7.0
+  camera_platform_interface:
+    git:
+      url: git@github.com:marvin-kolja/packages.git
+      path: packages/camera/camera_platform_interface
+      ref: 'e98eb9df2ba2822ac16ae6265454129d80a65f64'
   flutter:
     sdk: flutter
   stream_transform: ^2.0.0
-
-dependency_overrides:
-  camera_platform_interface:
-    path: '../camera_platform_interface'
 
 dev_dependencies:
   async: ^2.5.0
