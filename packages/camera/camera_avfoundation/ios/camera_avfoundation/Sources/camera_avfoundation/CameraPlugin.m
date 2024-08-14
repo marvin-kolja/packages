@@ -306,8 +306,6 @@ static FlutterError *FlutterErrorFromNSError(NSError *error) {
         [parsedFrameRateRanges addObject:range];
       }
 
-      NSLog(@"format: %@", format);
-
       CMMediaType mediaType = CMFormatDescriptionGetMediaType(format.formatDescription);
       NSString *mediaTypeString = mediaType == kCMMediaType_Video ? @"video" : @"audio";
       FourCharCode mediaSubType = CMFormatDescriptionGetMediaSubType(format.formatDescription);
