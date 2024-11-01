@@ -55,7 +55,8 @@ Future<int> generateExamplePigeons() async {
   );
 }
 
-Future<int> generateTestPigeons({required String baseDir}) async {
+Future<int> generateTestPigeons(
+    {required String baseDir, bool includeOverflow = false}) async {
   // TODO(stuartmorgan): Make this dynamic rather than hard-coded. Or eliminate
   // it entirely; see https://github.com/flutter/flutter/issues/115169.
   const List<String> inputs = <String>[
@@ -90,7 +91,8 @@ Future<int> generateTestPigeons({required String baseDir}) async {
         ? 'FlutterError'
         : '${pascalCaseName}Error';
 
-    final bool swiftErrorUseDefaultErrorName = input == 'core_tests';
+    final bool swiftErrorUseDefaultErrorName =
+        input == 'core_tests' || input == 'background_platform_channels';
 
     final String? swiftErrorClassName =
         swiftErrorUseDefaultErrorName ? null : '${pascalCaseName}Error';
@@ -116,6 +118,7 @@ Future<int> generateTestPigeons({required String baseDir}) async {
           ? null
           : '$outputBase/ios/Classes/$pascalCaseName.gen.swift',
       swiftErrorClassName: swiftErrorClassName,
+      swiftIncludeErrorClass: input != 'core_tests',
       // Linux
       gobjectHeaderOut: skipLanguages.contains(GeneratorLanguage.gobject)
           ? null
@@ -132,6 +135,7 @@ Future<int> generateTestPigeons({required String baseDir}) async {
           ? null
           : '$outputBase/windows/pigeon/$input.gen.cpp',
       cppNamespace: '${input}_pigeontest',
+      injectOverflowTypes: includeOverflow && input == 'core_tests',
     );
     if (generateCode != 0) {
       return generateCode;
@@ -146,8 +150,10 @@ Future<int> generateTestPigeons({required String baseDir}) async {
           ? null
           : '$outputBase/macos/Classes/$pascalCaseName.gen.swift',
       swiftErrorClassName: swiftErrorClassName,
+      swiftIncludeErrorClass: input != 'core_tests',
       suppressVersion: true,
       dartPackageName: 'pigeon_integration_tests',
+      injectOverflowTypes: includeOverflow && input == 'core_tests',
     );
     if (generateCode != 0) {
       return generateCode;
@@ -174,6 +180,7 @@ Future<int> generateTestPigeons({required String baseDir}) async {
       objcPrefix: input == 'core_tests' ? 'FLT' : '',
       suppressVersion: true,
       dartPackageName: 'pigeon_integration_tests',
+      injectOverflowTypes: includeOverflow && input == 'core_tests',
     );
     if (generateCode != 0) {
       return generateCode;
@@ -190,8 +197,10 @@ Future<int> generateTestPigeons({required String baseDir}) async {
       objcSourceOut: skipLanguages.contains(GeneratorLanguage.objc)
           ? null
           : '$alternateOutputBase/macos/Classes/$pascalCaseName.gen.m',
+      objcPrefix: input == 'core_tests' ? 'FLT' : '',
       suppressVersion: true,
       dartPackageName: 'pigeon_integration_tests',
+      injectOverflowTypes: includeOverflow && input == 'core_tests',
     );
     if (generateCode != 0) {
       return generateCode;
@@ -206,6 +215,7 @@ Future<int> runPigeon({
   String? kotlinPackage,
   String? kotlinErrorClassName,
   bool kotlinIncludeErrorClass = true,
+  bool swiftIncludeErrorClass = true,
   String? swiftOut,
   String? swiftErrorClassName,
   String? cppHeaderOut,
@@ -225,6 +235,7 @@ Future<int> runPigeon({
   String copyrightHeader = './copyright_header.txt',
   String? basePath,
   String? dartPackageName,
+  bool injectOverflowTypes = false,
 }) async {
   // Temporarily suppress the version output via the global flag if requested.
   // This is done because having the version in all the generated test output
@@ -238,36 +249,40 @@ Future<int> runPigeon({
   if (suppressVersion) {
     includeVersionInGeneratedWarning = false;
   }
-  final int result = await Pigeon.runWithOptions(PigeonOptions(
-    input: input,
-    copyrightHeader: copyrightHeader,
-    dartOut: dartOut,
-    dartTestOut: dartTestOut,
-    dartOptions: const DartOptions(),
-    cppHeaderOut: cppHeaderOut,
-    cppSourceOut: cppSourceOut,
-    cppOptions: CppOptions(namespace: cppNamespace),
-    gobjectHeaderOut: gobjectHeaderOut,
-    gobjectSourceOut: gobjectSourceOut,
-    gobjectOptions: GObjectOptions(module: gobjectModule),
-    javaOut: javaOut,
-    javaOptions: JavaOptions(package: javaPackage),
-    kotlinOut: kotlinOut,
-    kotlinOptions: KotlinOptions(
-      package: kotlinPackage,
-      errorClassName: kotlinErrorClassName,
-      includeErrorClass: kotlinIncludeErrorClass,
+  final int result = await Pigeon.runWithOptions(
+    PigeonOptions(
+      input: input,
+      copyrightHeader: copyrightHeader,
+      dartOut: dartOut,
+      dartTestOut: dartTestOut,
+      dartOptions: const DartOptions(),
+      cppHeaderOut: cppHeaderOut,
+      cppSourceOut: cppSourceOut,
+      cppOptions: CppOptions(namespace: cppNamespace),
+      gobjectHeaderOut: gobjectHeaderOut,
+      gobjectSourceOut: gobjectSourceOut,
+      gobjectOptions: GObjectOptions(module: gobjectModule),
+      javaOut: javaOut,
+      javaOptions: JavaOptions(package: javaPackage),
+      kotlinOut: kotlinOut,
+      kotlinOptions: KotlinOptions(
+        package: kotlinPackage,
+        errorClassName: kotlinErrorClassName,
+        includeErrorClass: kotlinIncludeErrorClass,
+      ),
+      objcHeaderOut: objcHeaderOut,
+      objcSourceOut: objcSourceOut,
+      objcOptions: ObjcOptions(prefix: objcPrefix),
+      swiftOut: swiftOut,
+      swiftOptions: SwiftOptions(
+        errorClassName: swiftErrorClassName,
+        includeErrorClass: swiftIncludeErrorClass,
+      ),
+      basePath: basePath,
+      dartPackageName: dartPackageName,
     ),
-    objcHeaderOut: objcHeaderOut,
-    objcSourceOut: objcSourceOut,
-    objcOptions: ObjcOptions(prefix: objcPrefix),
-    swiftOut: swiftOut,
-    swiftOptions: SwiftOptions(
-      errorClassName: swiftErrorClassName,
-    ),
-    basePath: basePath,
-    dartPackageName: dartPackageName,
-  ));
+    injectOverflowTypes: injectOverflowTypes,
+  );
   includeVersionInGeneratedWarning = originalWarningSetting;
   return result;
 }

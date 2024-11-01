@@ -25,7 +25,7 @@ public class LegacySharedPreferencesPlugin: NSObject, FlutterPlugin, LegacyUserD
     LegacyUserDefaultsApiSetup.setUp(binaryMessenger: messenger, api: instance)
   }
 
-  func getAll(prefix: String, allowList: [String]?) -> [String?: Any?] {
+  func getAll(prefix: String, allowList: [String]?) -> [String: Any] {
     return getAllPrefs(prefix: prefix, allowList: allowList)
   }
 
@@ -152,7 +152,13 @@ public class SharedPreferencesPlugin: NSObject, FlutterPlugin, UserDefaultsApi {
     var filteredPrefs: [String: Any] = [:]
     var compatiblePrefs: [String: Any] = [:]
     let allowSet = allowList.map { Set($0) }
-    if let appDomain = Bundle.main.bundleIdentifier,
+
+    // Since `getUserDefaults` is initialized with the suite name, it seems redundant to call
+    // `persistentDomain` with the suite name again. However, it is necessary because
+    // `dictionaryRepresentation` returns keys from the global domain.
+    // Also, Apple's docs on `persistentDomain` are incorrect,
+    // see: https://github.com/feedback-assistant/reports/issues/165
+    if let appDomain = options.suiteName ?? Bundle.main.bundleIdentifier,
       let prefs = try getUserDefaults(options: options).persistentDomain(forName: appDomain)
     {
       if let allowSet = allowSet {

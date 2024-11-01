@@ -357,6 +357,46 @@ class MockIMAAdsManager extends _i1.Mock implements _i2.IMAAdsManager {
       ) as _i3.Future<void>);
 
   @override
+  _i3.Future<void> pause() => (super.noSuchMethod(
+        Invocation.method(
+          #pause,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> resume() => (super.noSuchMethod(
+        Invocation.method(
+          #resume,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> skip() => (super.noSuchMethod(
+        Invocation.method(
+          #skip,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
+  _i3.Future<void> discardAdBreak() => (super.noSuchMethod(
+        Invocation.method(
+          #discardAdBreak,
+          [],
+        ),
+        returnValue: _i3.Future<void>.value(),
+        returnValueForMissingStub: _i3.Future<void>.value(),
+      ) as _i3.Future<void>);
+
+  @override
   _i3.Future<void> destroy() => (super.noSuchMethod(
         Invocation.method(
           #destroy,
@@ -498,6 +538,28 @@ class MockUIViewController extends _i1.Mock implements _i2.UIViewController {
           Invocation.getter(#pigeon_instanceManager),
         ),
       ) as _i2.PigeonInstanceManager);
+
+  @override
+  _i2.UIView pigeonVar_view() => (super.noSuchMethod(
+        Invocation.method(
+          #pigeonVar_view,
+          [],
+        ),
+        returnValue: _FakeUIView_6(
+          this,
+          Invocation.method(
+            #pigeonVar_view,
+            [],
+          ),
+        ),
+        returnValueForMissingStub: _FakeUIView_6(
+          this,
+          Invocation.method(
+            #pigeonVar_view,
+            [],
+          ),
+        ),
+      ) as _i2.UIView);
 
   @override
   _i2.UIViewController pigeon_copy() => (super.noSuchMethod(
