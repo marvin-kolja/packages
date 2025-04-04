@@ -16,6 +16,23 @@ enum CameraLensDirection {
   external,
 }
 
+/// Represents various built-in camera lens types available on a device.
+///
+/// Each lens type offers different focal lengths and capabilities for capturing images.
+enum CameraLensType {
+  /// A built-in wide-angle camera device type.
+  wide,
+
+  /// A built-in camera device type with a longer focal length than a wide-angle camera.
+  telephoto,
+
+  /// A built-in camera device type with a shorter focal length than a wide-angle camera.
+  ultraWide,
+
+  /// Unknown camera device type.
+  unknown,
+}
+
 /// Properties of a camera device.
 @immutable
 class CameraDescription {
@@ -24,7 +41,7 @@ class CameraDescription {
     required this.name,
     required this.lensDirection,
     required this.sensorOrientation,
-    this.deviceType,
+    this.lensType = CameraLensType.unknown,
   });
 
   /// The name of the camera device.
@@ -42,14 +59,8 @@ class CameraDescription {
   /// is from top to bottom in the sensor's coordinate system.
   final int sensorOrientation;
 
-  /// The type of the camera device.
-  ///
-  /// This is an optional field and may be `null` if the device type is unknown
-  /// or not supported.
-  ///
-  /// **iOS only:**
-  /// Represents the [AVCaptureDeviceType] of the camera device.
-  final String? deviceType;
+  /// The type of lens the camera has.
+  final CameraLensType lensType;
 
   @override
   bool operator ==(Object other) =>
@@ -57,14 +68,15 @@ class CameraDescription {
       other is CameraDescription &&
           runtimeType == other.runtimeType &&
           name == other.name &&
-          lensDirection == other.lensDirection;
+          lensDirection == other.lensDirection &&
+          lensType == other.lensType;
 
   @override
-  int get hashCode => Object.hash(name, lensDirection);
+  int get hashCode => Object.hash(name, lensDirection, lensType);
 
   @override
   String toString() {
     return '${objectRuntimeType(this, 'CameraDescription')}('
-        '$name, $lensDirection, $sensorOrientation)';
+        '$name, $lensDirection, $sensorOrientation, $lensType)';
   }
 }

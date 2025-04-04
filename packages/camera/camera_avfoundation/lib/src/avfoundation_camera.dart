@@ -243,6 +243,9 @@ class AVFoundationCamera extends CameraPlatform {
   }
 
   @override
+  bool supportsImageStreaming() => true;
+
+  @override
   Stream<CameraImageData> onStreamedFrameAvailable(int cameraId,
       {CameraImageStreamOptions? options}) {
     _frameStreamController =
