@@ -49,6 +49,16 @@ static id GetNullableObjectAtIndex(NSArray<id> *array, NSInteger key) {
 }
 @end
 
+@implementation FCPPlatformCameraLensTypeBox
+- (instancetype)initWithValue:(FCPPlatformCameraLensType)value {
+  self = [super init];
+  if (self) {
+    _value = value;
+  }
+  return self;
+}
+@end
+
 @implementation FCPPlatformDeviceOrientationBox
 - (instancetype)initWithValue:(FCPPlatformDeviceOrientation)value {
   self = [super init];
@@ -171,11 +181,11 @@ static id GetNullableObjectAtIndex(NSArray<id> *array, NSInteger key) {
 @implementation FCPPlatformCameraDescription
 + (instancetype)makeWithName:(NSString *)name
                lensDirection:(FCPPlatformCameraLensDirection)lensDirection
-                  deviceType:(NSString *)deviceType {
+                    lensType:(FCPPlatformCameraLensType)lensType {
   FCPPlatformCameraDescription *pigeonResult = [[FCPPlatformCameraDescription alloc] init];
   pigeonResult.name = name;
   pigeonResult.lensDirection = lensDirection;
-  pigeonResult.deviceType = deviceType;
+  pigeonResult.lensType = lensType;
   return pigeonResult;
 }
 + (FCPPlatformCameraDescription *)fromList:(NSArray<id> *)list {
@@ -184,7 +194,8 @@ static id GetNullableObjectAtIndex(NSArray<id> *array, NSInteger key) {
   FCPPlatformCameraLensDirectionBox *boxedFCPPlatformCameraLensDirection =
       GetNullableObjectAtIndex(list, 1);
   pigeonResult.lensDirection = boxedFCPPlatformCameraLensDirection.value;
-  pigeonResult.deviceType = GetNullableObjectAtIndex(list, 2);
+  FCPPlatformCameraLensTypeBox *boxedFCPPlatformCameraLensType = GetNullableObjectAtIndex(list, 2);
+  pigeonResult.lensType = boxedFCPPlatformCameraLensType.value;
   return pigeonResult;
 }
 + (nullable FCPPlatformCameraDescription *)nullableFromList:(NSArray<id> *)list {
@@ -194,7 +205,7 @@ static id GetNullableObjectAtIndex(NSArray<id> *array, NSInteger key) {
   return @[
     self.name ?: [NSNull null],
     [[FCPPlatformCameraLensDirectionBox alloc] initWithValue:self.lensDirection],
-    self.deviceType ?: [NSNull null],
+    [[FCPPlatformCameraLensTypeBox alloc] initWithValue:self.lensType],
   ];
 }
 @end
@@ -423,61 +434,67 @@ static id GetNullableObjectAtIndex(NSArray<id> *array, NSInteger key) {
     }
     case 130: {
       NSNumber *enumAsNumber = [self readValue];
-      return enumAsNumber == nil ? nil
-                                 : [[FCPPlatformDeviceOrientationBox alloc]
-                                       initWithValue:[enumAsNumber integerValue]];
+      return enumAsNumber == nil
+                 ? nil
+                 : [[FCPPlatformCameraLensTypeBox alloc] initWithValue:[enumAsNumber integerValue]];
     }
     case 131: {
       NSNumber *enumAsNumber = [self readValue];
-      return enumAsNumber == nil
-                 ? nil
-                 : [[FCPPlatformExposureModeBox alloc] initWithValue:[enumAsNumber integerValue]];
+      return enumAsNumber == nil ? nil
+                                 : [[FCPPlatformDeviceOrientationBox alloc]
+                                       initWithValue:[enumAsNumber integerValue]];
     }
     case 132: {
       NSNumber *enumAsNumber = [self readValue];
       return enumAsNumber == nil
                  ? nil
-                 : [[FCPPlatformFlashModeBox alloc] initWithValue:[enumAsNumber integerValue]];
+                 : [[FCPPlatformExposureModeBox alloc] initWithValue:[enumAsNumber integerValue]];
     }
     case 133: {
       NSNumber *enumAsNumber = [self readValue];
       return enumAsNumber == nil
                  ? nil
-                 : [[FCPPlatformFocusModeBox alloc] initWithValue:[enumAsNumber integerValue]];
+                 : [[FCPPlatformFlashModeBox alloc] initWithValue:[enumAsNumber integerValue]];
     }
     case 134: {
+      NSNumber *enumAsNumber = [self readValue];
+      return enumAsNumber == nil
+                 ? nil
+                 : [[FCPPlatformFocusModeBox alloc] initWithValue:[enumAsNumber integerValue]];
+    }
+    case 135: {
       NSNumber *enumAsNumber = [self readValue];
       return enumAsNumber == nil ? nil
                                  : [[FCPPlatformImageFileFormatBox alloc]
                                        initWithValue:[enumAsNumber integerValue]];
     }
-    case 135: {
+    case 136: {
       NSNumber *enumAsNumber = [self readValue];
       return enumAsNumber == nil ? nil
                                  : [[FCPPlatformImageFormatGroupBox alloc]
                                        initWithValue:[enumAsNumber integerValue]];
     }
-    case 136: {
+    case 137: {
       NSNumber *enumAsNumber = [self readValue];
       return enumAsNumber == nil ? nil
                                  : [[FCPPlatformResolutionPresetBox alloc]
                                        initWithValue:[enumAsNumber integerValue]];
     }
-    case 137:
-      return [FCPPlatformCameraDescription fromList:[self readValue]];
     case 138:
-      return [FCPPlatformFrameRateRange fromList:[self readValue]];
+      return [FCPPlatformCameraDescription fromList:[self readValue]];
     case 139:
-      return [FCPPlatformDeviceFormat fromList:[self readValue]];
+      return [FCPPlatformFrameRateRange fromList:[self readValue]];
     case 140:
-      return [FCPPlatformCameraState fromList:[self readValue]];
+      return [FCPPlatformDeviceFormat fromList:[self readValue]];
     case 141:
-      return [FCPPlatformMediaSettings fromList:[self readValue]];
+      return [FCPPlatformCameraState fromList:[self readValue]];
     case 142:
-      return [FCPPlatformVideoDimensions fromList:[self readValue]];
+      return [FCPPlatformMediaSettings fromList:[self readValue]];
     case 143:
-      return [FCPPlatformPoint fromList:[self readValue]];
+      return [FCPPlatformVideoDimensions fromList:[self readValue]];
     case 144:
+      return [FCPPlatformPoint fromList:[self readValue]];
+    case 145:
       return [FCPPlatformSize fromList:[self readValue]];
     default:
       return [super readValueOfType:type];
@@ -493,57 +510,61 @@ static id GetNullableObjectAtIndex(NSArray<id> *array, NSInteger key) {
     FCPPlatformCameraLensDirectionBox *box = (FCPPlatformCameraLensDirectionBox *)value;
     [self writeByte:129];
     [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
+  } else if ([value isKindOfClass:[FCPPlatformCameraLensTypeBox class]]) {
+    FCPPlatformCameraLensTypeBox *box = (FCPPlatformCameraLensTypeBox *)value;
+    [self writeByte:130];
+    [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
   } else if ([value isKindOfClass:[FCPPlatformDeviceOrientationBox class]]) {
     FCPPlatformDeviceOrientationBox *box = (FCPPlatformDeviceOrientationBox *)value;
-    [self writeByte:130];
+    [self writeByte:131];
     [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
   } else if ([value isKindOfClass:[FCPPlatformExposureModeBox class]]) {
     FCPPlatformExposureModeBox *box = (FCPPlatformExposureModeBox *)value;
-    [self writeByte:131];
+    [self writeByte:132];
     [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
   } else if ([value isKindOfClass:[FCPPlatformFlashModeBox class]]) {
     FCPPlatformFlashModeBox *box = (FCPPlatformFlashModeBox *)value;
-    [self writeByte:132];
+    [self writeByte:133];
     [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
   } else if ([value isKindOfClass:[FCPPlatformFocusModeBox class]]) {
     FCPPlatformFocusModeBox *box = (FCPPlatformFocusModeBox *)value;
-    [self writeByte:133];
+    [self writeByte:134];
     [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
   } else if ([value isKindOfClass:[FCPPlatformImageFileFormatBox class]]) {
     FCPPlatformImageFileFormatBox *box = (FCPPlatformImageFileFormatBox *)value;
-    [self writeByte:134];
+    [self writeByte:135];
     [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
   } else if ([value isKindOfClass:[FCPPlatformImageFormatGroupBox class]]) {
     FCPPlatformImageFormatGroupBox *box = (FCPPlatformImageFormatGroupBox *)value;
-    [self writeByte:135];
+    [self writeByte:136];
     [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
   } else if ([value isKindOfClass:[FCPPlatformResolutionPresetBox class]]) {
     FCPPlatformResolutionPresetBox *box = (FCPPlatformResolutionPresetBox *)value;
-    [self writeByte:136];
+    [self writeByte:137];
     [self writeValue:(value == nil ? [NSNull null] : [NSNumber numberWithInteger:box.value])];
   } else if ([value isKindOfClass:[FCPPlatformCameraDescription class]]) {
-    [self writeByte:137];
-    [self writeValue:[value toList]];
-  } else if ([value isKindOfClass:[FCPPlatformFrameRateRange class]]) {
     [self writeByte:138];
     [self writeValue:[value toList]];
-  } else if ([value isKindOfClass:[FCPPlatformDeviceFormat class]]) {
+  } else if ([value isKindOfClass:[FCPPlatformFrameRateRange class]]) {
     [self writeByte:139];
     [self writeValue:[value toList]];
-  } else if ([value isKindOfClass:[FCPPlatformCameraState class]]) {
+  } else if ([value isKindOfClass:[FCPPlatformDeviceFormat class]]) {
     [self writeByte:140];
     [self writeValue:[value toList]];
-  } else if ([value isKindOfClass:[FCPPlatformMediaSettings class]]) {
+  } else if ([value isKindOfClass:[FCPPlatformCameraState class]]) {
     [self writeByte:141];
     [self writeValue:[value toList]];
-  } else if ([value isKindOfClass:[FCPPlatformVideoDimensions class]]) {
+  } else if ([value isKindOfClass:[FCPPlatformMediaSettings class]]) {
     [self writeByte:142];
     [self writeValue:[value toList]];
-  } else if ([value isKindOfClass:[FCPPlatformPoint class]]) {
+  } else if ([value isKindOfClass:[FCPPlatformVideoDimensions class]]) {
     [self writeByte:143];
     [self writeValue:[value toList]];
-  } else if ([value isKindOfClass:[FCPPlatformSize class]]) {
+  } else if ([value isKindOfClass:[FCPPlatformPoint class]]) {
     [self writeByte:144];
+    [self writeValue:[value toList]];
+  } else if ([value isKindOfClass:[FCPPlatformSize class]]) {
+    [self writeByte:145];
     [self writeValue:[value toList]];
   } else {
     [super writeValue:value];

@@ -43,6 +43,20 @@ enum PlatformCameraLensDirection {
   external,
 }
 
+enum PlatformCameraLensType {
+  /// A built-in wide-angle camera device type.
+  wide,
+
+  /// A built-in camera device type with a longer focal length than a wide-angle camera.
+  telephoto,
+
+  /// A built-in camera device type with a shorter focal length than a wide-angle camera.
+  ultraWide,
+
+  /// Unknown camera device type.
+  unknown,
+}
+
 enum PlatformDeviceOrientation {
   portraitUp,
   landscapeLeft,
@@ -67,7 +81,7 @@ class PlatformCameraDescription {
   PlatformCameraDescription({
     required this.name,
     required this.lensDirection,
-    required this.deviceType,
+    required this.lensType,
   });
 
   /// The name of the camera device.
@@ -76,15 +90,11 @@ class PlatformCameraDescription {
   /// The direction the camera is facing.
   PlatformCameraLensDirection lensDirection;
 
-  /// The type of the camera device.
-  String deviceType;
+  /// The type of the camera lens.
+  PlatformCameraLensType lensType;
 
   Object encode() {
-    return <Object?>[
-      name,
-      lensDirection,
-      deviceType,
-    ];
+    return <Object?>[name, lensDirection, lensType];
   }
 
   static PlatformCameraDescription decode(Object result) {
@@ -92,26 +102,20 @@ class PlatformCameraDescription {
     return PlatformCameraDescription(
       name: result[0]! as String,
       lensDirection: result[1]! as PlatformCameraLensDirection,
-      deviceType: result[2]! as String,
+      lensType: result[2]! as PlatformCameraLensType,
     );
   }
 }
 
 class PlatformFrameRateRange {
-  PlatformFrameRateRange({
-    required this.min,
-    required this.max,
-  });
+  PlatformFrameRateRange({required this.min, required this.max});
 
   double min;
 
   double max;
 
   Object encode() {
-    return <Object?>[
-      min,
-      max,
-    ];
+    return <Object?>[min, max];
   }
 
   static PlatformFrameRateRange decode(Object result) {
@@ -143,13 +147,7 @@ class PlatformDeviceFormat {
   bool hdr;
 
   Object encode() {
-    return <Object?>[
-      dimensions,
-      frameRateRanges,
-      mediaType,
-      mediaSubType,
-      hdr,
-    ];
+    return <Object?>[dimensions, frameRateRanges, mediaType, mediaSubType, hdr];
   }
 
   static PlatformDeviceFormat decode(Object result) {
@@ -253,20 +251,14 @@ class PlatformMediaSettings {
 }
 
 class PlatformVideoDimensions {
-  PlatformVideoDimensions({
-    required this.width,
-    required this.height,
-  });
+  PlatformVideoDimensions({required this.width, required this.height});
 
   int width;
 
   int height;
 
   Object encode() {
-    return <Object?>[
-      width,
-      height,
-    ];
+    return <Object?>[width, height];
   }
 
   static PlatformVideoDimensions decode(Object result) {
@@ -325,50 +317,53 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is PlatformCameraLensDirection) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    } else if (value is PlatformDeviceOrientation) {
+    } else if (value is PlatformCameraLensType) {
       buffer.putUint8(130);
       writeValue(buffer, value.index);
-    } else if (value is PlatformExposureMode) {
+    } else if (value is PlatformDeviceOrientation) {
       buffer.putUint8(131);
       writeValue(buffer, value.index);
-    } else if (value is PlatformFlashMode) {
+    } else if (value is PlatformExposureMode) {
       buffer.putUint8(132);
       writeValue(buffer, value.index);
-    } else if (value is PlatformFocusMode) {
+    } else if (value is PlatformFlashMode) {
       buffer.putUint8(133);
       writeValue(buffer, value.index);
-    } else if (value is PlatformImageFileFormat) {
+    } else if (value is PlatformFocusMode) {
       buffer.putUint8(134);
       writeValue(buffer, value.index);
-    } else if (value is PlatformImageFormatGroup) {
+    } else if (value is PlatformImageFileFormat) {
       buffer.putUint8(135);
       writeValue(buffer, value.index);
-    } else if (value is PlatformResolutionPreset) {
+    } else if (value is PlatformImageFormatGroup) {
       buffer.putUint8(136);
       writeValue(buffer, value.index);
-    } else if (value is PlatformCameraDescription) {
+    } else if (value is PlatformResolutionPreset) {
       buffer.putUint8(137);
-      writeValue(buffer, value.encode());
-    } else if (value is PlatformFrameRateRange) {
+      writeValue(buffer, value.index);
+    } else if (value is PlatformCameraDescription) {
       buffer.putUint8(138);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformDeviceFormat) {
+    } else if (value is PlatformFrameRateRange) {
       buffer.putUint8(139);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformCameraState) {
+    } else if (value is PlatformDeviceFormat) {
       buffer.putUint8(140);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformMediaSettings) {
+    } else if (value is PlatformCameraState) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformVideoDimensions) {
+    } else if (value is PlatformMediaSettings) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformPoint) {
+    } else if (value is PlatformVideoDimensions) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    } else if (value is PlatformSize) {
+    } else if (value is PlatformPoint) {
       buffer.putUint8(144);
+      writeValue(buffer, value.encode());
+    } else if (value is PlatformSize) {
+      buffer.putUint8(145);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -383,40 +378,43 @@ class _PigeonCodec extends StandardMessageCodec {
         return value == null ? null : PlatformCameraLensDirection.values[value];
       case 130:
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : PlatformDeviceOrientation.values[value];
+        return value == null ? null : PlatformCameraLensType.values[value];
       case 131:
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : PlatformExposureMode.values[value];
+        return value == null ? null : PlatformDeviceOrientation.values[value];
       case 132:
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : PlatformFlashMode.values[value];
+        return value == null ? null : PlatformExposureMode.values[value];
       case 133:
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : PlatformFocusMode.values[value];
+        return value == null ? null : PlatformFlashMode.values[value];
       case 134:
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : PlatformImageFileFormat.values[value];
+        return value == null ? null : PlatformFocusMode.values[value];
       case 135:
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : PlatformImageFormatGroup.values[value];
+        return value == null ? null : PlatformImageFileFormat.values[value];
       case 136:
         final int? value = readValue(buffer) as int?;
-        return value == null ? null : PlatformResolutionPreset.values[value];
+        return value == null ? null : PlatformImageFormatGroup.values[value];
       case 137:
-        return PlatformCameraDescription.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : PlatformResolutionPreset.values[value];
       case 138:
-        return PlatformFrameRateRange.decode(readValue(buffer)!);
+        return PlatformCameraDescription.decode(readValue(buffer)!);
       case 139:
-        return PlatformDeviceFormat.decode(readValue(buffer)!);
+        return PlatformFrameRateRange.decode(readValue(buffer)!);
       case 140:
-        return PlatformCameraState.decode(readValue(buffer)!);
+        return PlatformDeviceFormat.decode(readValue(buffer)!);
       case 141:
-        return PlatformMediaSettings.decode(readValue(buffer)!);
+        return PlatformCameraState.decode(readValue(buffer)!);
       case 142:
-        return PlatformVideoDimensions.decode(readValue(buffer)!);
+        return PlatformMediaSettings.decode(readValue(buffer)!);
       case 143:
-        return PlatformPoint.decode(readValue(buffer)!);
+        return PlatformVideoDimensions.decode(readValue(buffer)!);
       case 144:
+        return PlatformPoint.decode(readValue(buffer)!);
+      case 145:
         return PlatformSize.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -1252,15 +1250,16 @@ class CameraApi {
   }
 
   Future<List<PlatformDeviceFormat>> getAvailableDeviceFormats(
-      String cameraName) async {
+    String cameraName,
+  ) async {
     final String pigeonVar_channelName =
         'dev.flutter.pigeon.camera_avfoundation.CameraApi.getAvailableDeviceFormats$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel =
         BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
+          pigeonVar_channelName,
+          pigeonChannelCodec,
+          binaryMessenger: pigeonVar_binaryMessenger,
+        );
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_channel.send(<Object?>[cameraName]) as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -1418,6 +1417,40 @@ abstract class CameraEventApi {
           );
           try {
             api.error(arg_message!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?>
+      pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.camera_avfoundation.CameraEventApi.focusingChanged$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.camera_avfoundation.CameraEventApi.focusingChanged was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final bool? arg_currentlyFocusing = (args[0] as bool?);
+          assert(
+            arg_currentlyFocusing != null,
+            'Argument for dev.flutter.pigeon.camera_avfoundation.CameraEventApi.focusingChanged was null, expected non-null bool.',
+          );
+          try {
+            api.focusingChanged(arg_currentlyFocusing!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

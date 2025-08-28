@@ -305,7 +305,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                   ),
                   IconButton(
                     icon: const Icon(Icons.filter_center_focus),
-                    color: Colors.blue,
+                    color: _isFocusing ? Colors.red : Colors.blue,
                     onPressed:
                         controller != null ? onFocusModeButtonPressed : null,
                   ),
@@ -573,12 +573,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   List<DeviceFormat>? availableFormatsAtResolution(
-      ResolutionPreset resolutionPreset) {
+    ResolutionPreset resolutionPreset,
+  ) {
     if (controller != null) {
       return _availableDeviceFormats[controller!.description]
-          ?.where((DeviceFormat format) =>
-              format.dimensions ==
-              _resolutionPresetToDimensions[resolutionPreset])
+          ?.where(
+            (DeviceFormat format) =>
+                format.dimensions ==
+                _resolutionPresetToDimensions[resolutionPreset],
+          )
           .toList();
     }
     return null;
@@ -589,8 +592,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         (_availableDeviceFormats[controller?.description] ?? [])
             .map((DeviceFormat e) => e.dimensions)
             .toSet()
-            .where((Point<int> dimensions) =>
-                _supportedDimensions.contains(dimensions))
+            .where(
+              (Point<int> dimensions) =>
+                  _supportedDimensions.contains(dimensions),
+            )
             .toList();
 
     return SizeTransition(
@@ -600,9 +605,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           color: Colors.grey.shade50,
           child: Column(
             children: <Widget>[
-              const Center(
-                child: Text('Video Settings'),
-              ),
+              const Center(child: Text('Video Settings')),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -613,9 +616,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                     else
                       ...uniqueDimensions.map((Point<int> dimensions) {
                         return TextButton(
-                          onPressed: controller != null
-                              ? () => onSetVideoResultionByDimension(dimensions)
-                              : null,
+                          onPressed:
+                              controller != null
+                                  ? () =>
+                                      onSetVideoResultionByDimension(dimensions)
+                                  : null,
                           child: Text('${dimensions.x}x${dimensions.y}'),
                         );
                       }),
@@ -628,18 +633,23 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     if (_selectedResolutionPreset != null)
-                      ...availableFormatsAtResolution(
-                              _selectedResolutionPreset!)!
+                      ...(availableFormatsAtResolution(
+                                _selectedResolutionPreset!,
+                              ) ??
+                              <DeviceFormat>[])
                           .map((DeviceFormat e) => e.frameRateRanges.first)
                           .toSet()
                           .map((FrameRateRange frameRate) {
-                        return TextButton(
-                          onPressed: controller != null
-                              ? () => onSetVideoFrameRate(frameRate.max.toInt())
-                              : null,
-                          child: Text('${frameRate.max} fps'),
-                        );
-                      })
+                            return TextButton(
+                              onPressed:
+                                  controller != null
+                                      ? () => onSetVideoFrameRate(
+                                        frameRate.max.toInt(),
+                                      )
+                                      : null,
+                              child: Text('${frameRate.max} fps'),
+                            );
+                          })
                     else
                       const Text('No frame rates available'),
                   ],
@@ -798,27 +808,34 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
     if (fps != null) {
       print('Selected frame rate: $fps');
-      final availableDeviceFormatsAtResolution =
-          availableFormatsAtResolution(resolutionPreset);
+      final availableDeviceFormatsAtResolution = availableFormatsAtResolution(
+        resolutionPreset,
+      );
 
       print(
-          'Available device formats at resolution: $availableDeviceFormatsAtResolution');
+        'Available device formats at resolution: $availableDeviceFormatsAtResolution',
+      );
 
       if (availableDeviceFormatsAtResolution == null) {
         fps = null;
       } else {
-        final bool isFrameRateSupported =
-            availableDeviceFormatsAtResolution.any((DeviceFormat format) =>
-                format.frameRateRanges.any((FrameRateRange range) =>
-                    range.max >= fps! && range.min <= fps));
+        final bool isFrameRateSupported = availableDeviceFormatsAtResolution
+            .any(
+              (DeviceFormat format) => format.frameRateRanges.any(
+                (FrameRateRange range) => range.max >= fps! && range.min <= fps,
+              ),
+            );
 
         if (!isFrameRateSupported) {
-          final nearestFrameRate = availableDeviceFormatsAtResolution
-              .expand((DeviceFormat format) => format.frameRateRanges)
-              .map((FrameRateRange range) => range.max)
-              .reduce((double a, double b) =>
-                  (a - fps!).abs() < (b - fps).abs() ? a : b)
-              .toInt();
+          final nearestFrameRate =
+              availableDeviceFormatsAtResolution
+                  .expand((DeviceFormat format) => format.frameRateRanges)
+                  .map((FrameRateRange range) => range.max)
+                  .reduce(
+                    (double a, double b) =>
+                        (a - fps!).abs() < (b - fps).abs() ? a : b,
+                  )
+                  .toInt();
           fps = nearestFrameRate;
         }
       }
@@ -872,14 +889,14 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             .then((double value) => _maxAvailableZoom = value),
         CameraPlatform.instance
             .getMinZoomLevel(cameraController.cameraId)
-            .then((double value) => _minAvailableZoom = value)
+            .then((double value) => _minAvailableZoom = value),
       ]);
 
       if (_availableDeviceFormats[cameraController.description]?.isEmpty ??
           true) {
-        _availableDeviceFormats[cameraController.description] =
-            await CameraPlatform.instance
-                .getAvailableDeviceFormats(cameraController.description);
+        _availableDeviceFormats[cameraController
+            .description] = await CameraPlatform.instance
+            .getAvailableDeviceFormats(cameraController.description);
       }
     } on CameraException catch (e) {
       switch (e.code) {
@@ -1279,10 +1296,10 @@ Map<CameraDescription, List<DeviceFormat>> _availableDeviceFormats =
 
 final Map<Point<int>, ResolutionPreset> _dimensionsToPreset =
     <Point<int>, ResolutionPreset>{
-  const Point<int>(3840, 2160): ResolutionPreset.ultraHigh,
-  const Point<int>(1920, 1080): ResolutionPreset.veryHigh,
-  const Point<int>(1280, 720): ResolutionPreset.high,
-};
+      const Point<int>(3840, 2160): ResolutionPreset.ultraHigh,
+      const Point<int>(1920, 1080): ResolutionPreset.veryHigh,
+      const Point<int>(1280, 720): ResolutionPreset.high,
+    };
 
 const List<Point<int>> _supportedDimensions = <Point<int>>[
   Point<int>(3840, 2160),
@@ -1292,10 +1309,10 @@ const List<Point<int>> _supportedDimensions = <Point<int>>[
 
 final Map<ResolutionPreset, Point<int>> _resolutionPresetToDimensions =
     <ResolutionPreset, Point<int>>{
-  ResolutionPreset.ultraHigh: const Point<int>(3840, 2160),
-  ResolutionPreset.veryHigh: const Point<int>(1920, 1080),
-  ResolutionPreset.high: const Point<int>(1280, 720),
-};
+      ResolutionPreset.ultraHigh: const Point<int>(3840, 2160),
+      ResolutionPreset.veryHigh: const Point<int>(1920, 1080),
+      ResolutionPreset.high: const Point<int>(1280, 720),
+    };
 
 Future<void> main() async {
   // Fetch the available cameras before initializing the app.

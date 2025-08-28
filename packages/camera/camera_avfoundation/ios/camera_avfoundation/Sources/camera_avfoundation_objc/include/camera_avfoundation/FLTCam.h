@@ -75,8 +75,6 @@ NS_ASSUME_NONNULL_BEGIN
 // Methods exposed for the Swift DefaultCamera subclass
 - (void)updateOrientation;
 
-- (void)listenToAdjustingFocus:(BOOL)listen;
-
 @end
 
 NS_ASSUME_NONNULL_END

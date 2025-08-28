@@ -16,8 +16,8 @@ CameraDescription cameraDescriptionFromPlatform(
   return CameraDescription(
     name: camera.name,
     lensDirection: cameraLensDirectionFromPlatform(camera.lensDirection),
-    deviceType: camera.deviceType,
-      sensorOrientation: 90,
+    sensorOrientation: 90,
+    lensType: cameraLensTypeFromPlatform(camera.lensType),
   );
 }
 
@@ -34,27 +34,33 @@ CameraLensDirection cameraLensDirectionFromPlatform(
 
 /// Converts a Pigeon [PlatformFrameRateRange] to a [FrameRateRange].
 FrameRateRange frameRateRangeFromPlatform(PlatformFrameRateRange range) {
-  return FrameRateRange(
-    min: range.min,
-    max: range.max,
-  );
+  return FrameRateRange(min: range.min, max: range.max);
 }
 
 /// Converts a Pigeon [PlatformDeviceFormat] to a [DeviceFormat].
 DeviceFormat deviceFormatFromPlatform(PlatformDeviceFormat format) {
   return DeviceFormat(
     dimensions: Point<int>(format.dimensions.width, format.dimensions.height),
-    frameRateRanges: format.frameRateRanges
-        .map((PlatformFrameRateRange? c) => c!)
-        .map(frameRateRangeFromPlatform)
-        .toList(),
+    frameRateRanges:
+        format.frameRateRanges
+            .map((PlatformFrameRateRange? c) => c!)
+            .map(frameRateRangeFromPlatform)
+            .toList(),
     mediaType: format.mediaType,
     mediaSubType: format.mediaSubType,
     hdr: format.hdr,
   );
 }
 
-/// Converts
+/// Converts a Pigeon [PlatformCameraLensType] to a [CameraLensType].
+CameraLensType cameraLensTypeFromPlatform(PlatformCameraLensType type) {
+  return switch (type) {
+    PlatformCameraLensType.wide => CameraLensType.wide,
+    PlatformCameraLensType.telephoto => CameraLensType.telephoto,
+    PlatformCameraLensType.ultraWide => CameraLensType.ultraWide,
+    PlatformCameraLensType.unknown => CameraLensType.unknown,
+  };
+}
 
 /// Convents the given device orientation to Pigeon.
 PlatformDeviceOrientation serializeDeviceOrientation(

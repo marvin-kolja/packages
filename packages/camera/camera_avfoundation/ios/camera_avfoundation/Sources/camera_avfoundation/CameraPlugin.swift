@@ -161,9 +161,26 @@ extension CameraPlugin: FCPCameraApi {
           lensFacing = .external
         }
 
+        var lensType: FCPPlatformCameraLensType
+        switch device.device.deviceType {
+        case .builtInWideAngleCamera:
+          lensType = .wide
+        case .builtInTelephotoCamera:
+          lensType = .telephoto
+        // Check if available (ios 13)
+        case .builtInUltraWideCamera:
+          lensType = .ultraWide
+        // Check if available (ios 13)
+        case .builtInDualWideCamera:
+          lensType = .wide
+        default:
+          lensType = .unknown
+        }
+
         let cameraDescription = FCPPlatformCameraDescription.make(
           withName: device.uniqueID,
-          lensDirection: lensFacing
+          lensDirection: lensFacing,
+          lensType: lensType
         )
         reply.append(cameraDescription)
       }
@@ -304,6 +321,7 @@ extension CameraPlugin: FCPCameraApi {
 
     camera.reportInitializationState()
     sendDeviceOrientation(UIDevice.current.orientation)
+    camera.startListenToAdjustingFocus()
     camera.start()
     completion(nil)
   }
@@ -336,6 +354,7 @@ extension CameraPlugin: FCPCameraApi {
     registry.unregisterTexture(Int64(cameraId))
     captureSessionQueue.async { [weak self] in
       if let strongSelf = self {
+        strongSelf.camera?.stopListenToAdjustingFocus()
         strongSelf.camera?.close()
         strongSelf.camera = nil
       }
@@ -532,6 +551,60 @@ extension CameraPlugin: FCPCameraApi {
     captureSessionQueue.async { [weak self] in
       self?.camera?.setImageFileFormat(format)
       completion(nil)
+    }
+  }
+
+  public func getAvailableDeviceFormats(
+    _ cameraName: String,
+    completion: @escaping ([FCPPlatformDeviceFormat]?, FlutterError?) -> Void
+  ) {
+    captureSessionQueue.async {
+      guard let device = AVCaptureDevice(uniqueID: cameraName) else {
+        // Handle device not found error
+        let error = FlutterError(
+          code: "device_not_found", message: "No device found with ID \(cameraName)", details: nil)
+        completion(nil, error)
+        return
+      }
+
+      let formats = device.formats
+      var reply: [FCPPlatformDeviceFormat] = []
+
+      for format in formats {
+        let formatDescription = format.formatDescription
+        let dimensions = formatDescription.dimensions
+        let frameRateRanges = format.videoSupportedFrameRateRanges
+
+        var parsedFrameRateRanges: [FCPPlatformFrameRateRange] = []
+        for range in frameRateRanges {
+          let parsedRange = FCPPlatformFrameRateRange.make(
+            withMin: range.minFrameRate,
+            max: range.maxFrameRate
+          )
+          parsedFrameRateRanges.append(parsedRange)
+        }
+
+        let mediaType = formatDescription.mediaType
+        let mediaTypeString = (mediaType == .video) ? "video" : "audio"
+
+        //        let mediaSubType = formatDescription.mediaSubType
+        let mediaSubTypeString = ""  // TODO: Map mediaSubType to readable string if needed
+
+        let parsedFormat = FCPPlatformDeviceFormat.make(
+          with: FCPPlatformVideoDimensions.make(
+            withWidth: Int(dimensions.width),
+            height: Int(dimensions.height)
+          ),
+          frameRateRanges: parsedFrameRateRanges,
+          mediaType: mediaTypeString,
+          mediaSubType: mediaSubTypeString,
+          hdr: format.isVideoHDRSupported
+        )
+
+        reply.append(parsedFormat)
+      }
+
+      completion(reply, nil)
     }
   }
 }

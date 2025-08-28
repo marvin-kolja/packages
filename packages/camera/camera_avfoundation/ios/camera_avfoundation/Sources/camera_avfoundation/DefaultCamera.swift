@@ -1132,6 +1132,57 @@ final class DefaultCamera: FLTCam, Camera {
     }
   }
 
+  private var adjustingFocusObservation: NSKeyValueObservation?
+  private var lensPositionObservation: NSKeyValueObservation?
+
+  func startListenToAdjustingFocus() {
+    adjustingFocusObservation = captureDevice.device.observe(
+      \.isAdjustingFocus, options: [.new]
+    ) {
+      [weak self] device, change in
+      guard let strongSelf = self else { return }
+      guard let newValue = change.newValue
+      else {
+        return
+      }
+
+      strongSelf.reportAdjustingFocusChanged(currentlyFocusing: newValue)
+    }
+
+    lensPositionObservation = captureDevice.device.observe(
+      \.lensPosition, options: [.old, .new]
+    ) {
+      [weak self] device, change in
+      guard let strongSelf = self else { return }
+      guard let newValue = change.newValue,
+        let oldValue = change.oldValue
+      else {
+        return
+      }
+
+      // TODO: adjust this to have a more sophisticated algorithm to detect drastic changes
+      let lensPositionChange = abs(newValue - oldValue)
+      let lensPositionChangeThreshold: Float = 0.05
+      let drasticChange = lensPositionChange > lensPositionChangeThreshold
+
+      let shouldReportFocus = device.isAdjustingFocus || drasticChange
+      strongSelf.reportAdjustingFocusChanged(currentlyFocusing: shouldReportFocus)
+    }
+  }
+
+  func stopListenToAdjustingFocus() {
+    adjustingFocusObservation = nil
+    lensPositionObservation = nil
+  }
+
+  private func reportAdjustingFocusChanged(currentlyFocusing: Bool) {
+    FLTEnsureToRunOnMainQueue { [weak self] in
+      self?.dartAPI?.focusingChanged(currentlyFocusing) { _ in
+        // Ignore any errors, as this is just an event broadcast.
+      }
+    }
+  }
+
   deinit {
     motionManager.stopAccelerometerUpdates()
   }

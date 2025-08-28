@@ -8,10 +8,7 @@ import 'package:flutter/foundation.dart';
 @immutable
 class FrameRateRange {
   /// Creates a new camera description with the given properties.
-  const FrameRateRange({
-    required this.min,
-    required this.max,
-  });
+  const FrameRateRange({required this.min, required this.max});
 
   /// The minimum frame rate.
   /// The value is in frames per second.

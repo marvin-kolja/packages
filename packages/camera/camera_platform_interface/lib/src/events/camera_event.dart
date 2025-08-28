@@ -296,8 +296,8 @@ class CameraFocusingEvent extends CameraEvent {
   /// Converts the supplied [Map] to an instance of the [CameraFocusingEvent]
   /// class.
   CameraFocusingEvent.fromJson(Map<String, dynamic> json)
-      : currentlyFocusing = json['currentlyFocusing']! as bool,
-        super(json['cameraId']! as int);
+    : currentlyFocusing = json['currentlyFocusing']! as bool,
+      super(json['cameraId']! as int);
 
   /// Whether the camera is currently focusing.
   final bool currentlyFocusing;
@@ -305,9 +305,9 @@ class CameraFocusingEvent extends CameraEvent {
   /// Converts the [CameraFocusingEvent] instance into a [Map] instance that
   /// can be serialized to JSON.
   Map<String, dynamic> toJson() => <String, Object?>{
-        'cameraId': cameraId,
-        'currentlyFocusing': currentlyFocusing,
-      };
+    'cameraId': cameraId,
+    'currentlyFocusing': currentlyFocusing,
+  };
 
   @override
   bool operator ==(Object other) =>

@@ -30,6 +30,21 @@ enum PlatformCameraLensDirection {
   external,
 }
 
+// Pigeon version of CameraLensDirection.
+enum PlatformCameraLensType {
+  /// A built-in wide-angle camera device type.
+  wide,
+
+  /// A built-in camera device type with a longer focal length than a wide-angle camera.
+  telephoto,
+
+  /// A built-in camera device type with a shorter focal length than a wide-angle camera.
+  ultraWide,
+
+  /// Unknown camera device type.
+  unknown,
+}
+
 // Pigeon version of DeviceOrientation.
 enum PlatformDeviceOrientation {
   portraitUp,
@@ -61,7 +76,7 @@ class PlatformCameraDescription {
   PlatformCameraDescription({
     required this.name,
     required this.lensDirection,
-    required this.deviceType,
+    required this.lensType,
   });
 
   /// The name of the camera device.
@@ -70,16 +85,13 @@ class PlatformCameraDescription {
   /// The direction the camera is facing.
   final PlatformCameraLensDirection lensDirection;
 
-  /// The type of the camera device.
-  final String deviceType;
+  /// The type of the camera lens.
+  final PlatformCameraLensType lensType;
 }
 
 // Pigeon version of FrameRateRange.
 class PlatformFrameRateRange {
-  PlatformFrameRateRange({
-    required this.min,
-    required this.max,
-  });
+  PlatformFrameRateRange({required this.min, required this.max});
 
   final double min;
   final double max;

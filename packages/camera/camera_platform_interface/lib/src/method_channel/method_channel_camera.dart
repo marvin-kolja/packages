@@ -81,6 +81,9 @@ class MethodChannelCamera extends CameraPlatform {
             camera['lensFacing']! as String,
           ),
           sensorOrientation: camera['sensorOrientation']! as int,
+          lensType: parseCameraLensType(
+            camera['lensType'] as String?,
+          )
         );
       }).toList();
     } on PlatformException catch (e) {
@@ -529,17 +532,19 @@ class MethodChannelCamera extends CameraPlatform {
 
   @override
   Future<List<DeviceFormat>> getAvailableDeviceFormats(
-      CameraDescription description) async {
+    CameraDescription description,
+  ) async {
     if (!Platform.isIOS && !Platform.isMacOS) {
       throw UnimplementedError(
-          'getAvailableFormats is only available on iOS and macOS.');
+        'getAvailableFormats is only available on iOS and macOS.',
+      );
     }
 
-    final List<DeviceFormat>? formats =
-        await _channel.invokeListMethod<DeviceFormat>(
-      'getAvailableFormats',
-      <String, dynamic>{'cameraName': description.name},
-    );
+    final List<DeviceFormat>? formats = await _channel
+        .invokeListMethod<DeviceFormat>(
+          'getAvailableFormats',
+          <String, dynamic>{'cameraName': description.name},
+        );
 
     return formats!;
   }

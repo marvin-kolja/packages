@@ -19,6 +19,20 @@ CameraLensDirection parseCameraLensDirection(String string) {
   throw ArgumentError('Unknown CameraLensDirection value');
 }
 
+/// Parses a string into a corresponding CameraLensType.
+CameraLensType parseCameraLensType(String? string) {
+  switch (string) {
+    case 'wide':
+      return CameraLensType.wide;
+    case 'telephoto':
+      return CameraLensType.telephoto;
+    case 'ultraWide':
+      return CameraLensType.ultraWide;
+    default:
+      return CameraLensType.unknown;
+  }
+}
+
 /// Returns the device orientation as a String.
 String serializeDeviceOrientation(DeviceOrientation orientation) {
   switch (orientation) {

@@ -323,7 +323,8 @@ abstract class CameraPlatform extends PlatformInterface {
 
   /// Gets the available device formats for a [CameraDescription].
   Future<List<DeviceFormat>> getAvailableDeviceFormats(
-      CameraDescription description) {
+    CameraDescription description,
+  ) {
     throw UnimplementedError('getAvailableDeviceFormats() is not implemented.');
   }
 }

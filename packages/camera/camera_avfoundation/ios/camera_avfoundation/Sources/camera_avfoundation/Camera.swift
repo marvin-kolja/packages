@@ -128,4 +128,7 @@ protocol Camera: FlutterTexture, AVCaptureVideoDataOutputSampleBufferDelegate,
   )
 
   func close()
+
+  func startListenToAdjustingFocus()
+  func stopListenToAdjustingFocus()
 }

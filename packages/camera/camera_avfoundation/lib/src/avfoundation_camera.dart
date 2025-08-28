@@ -409,7 +409,8 @@ class AVFoundationCamera extends CameraPlatform {
 
   @override
   Future<List<DeviceFormat>> getAvailableDeviceFormats(
-      CameraDescription description) async {
+    CameraDescription description,
+  ) async {
     try {
       return (await _hostApi.getAvailableDeviceFormats(description.name))
           // See comment in messages.dart for why this is safe.
@@ -633,9 +634,6 @@ class HostCameraMessageHandler implements CameraEventApi {
 
   @override
   void focusingChanged(bool currentlyFocusing) {
-    streamController.add(CameraFocusingEvent(
-      cameraId,
-      currentlyFocusing,
-    ));
+    streamController.add(CameraFocusingEvent(cameraId, currentlyFocusing));
   }
 }
