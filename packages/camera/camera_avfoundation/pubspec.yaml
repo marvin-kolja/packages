@@ -23,7 +23,7 @@ dependencies:
     git:
       url: git@github.com:marvin-kolja/packages.git
       path: packages/camera/camera_platform_interface
-      ref: '223d4feed4ecd1bb83430095c02dae6451eee4de'
+      ref: 'df4512b4f1ae0542d8c44f5e8d783224816fa83e'
   flutter:
     sdk: flutter
   stream_transform: ^2.0.0
