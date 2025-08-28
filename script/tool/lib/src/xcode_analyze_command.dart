@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'common/core.dart';
+import 'common/file_filters.dart';
 import 'common/flutter_command_utils.dart';
 import 'common/output_utils.dart';
 import 'common/package_looping_command.dart';
@@ -46,6 +47,15 @@ class XcodeAnalyzeCommand extends PackageLoopingCommand {
   @override
   final String description =
       'Runs Xcode analysis on the iOS and/or macOS example apps.';
+
+  @override
+  bool shouldIgnoreFile(String path) {
+    return isRepoLevelNonCodeImpactingFile(path) ||
+        isPackageSupportFile(path) ||
+        // These are part of the build, but don't affect native code analysis.
+        path.endsWith('/pubspec.yaml') ||
+        path.endsWith('.dart');
+  }
 
   @override
   Future<void> initializeRun() async {
@@ -111,8 +121,14 @@ class XcodeAnalyzeCommand extends PackageLoopingCommand {
         targetPlatform == FlutterPlatform.ios ? 'iOS' : 'macOS';
     bool passing = true;
     for (final RepositoryPackage example in plugin.getExamples()) {
+      // See https://github.com/flutter/flutter/issues/172427 for discussion of
+      // why this is currently necessary.
+      print('Disabling Swift Package Manager...');
+      setSwiftPackageManagerState(example, enabled: false);
+
       // Unconditionally re-run build with --debug --config-only, to ensure that
-      // the project is in a debug state even if it was previously configured.
+      // the project is in a debug state even if it was previously configured,
+      // and that SwiftPM is disabled.
       print('Running flutter build --config-only...');
       final bool buildSuccess = await runConfigOnlyBuild(
         example,
@@ -152,6 +168,9 @@ class XcodeAnalyzeCommand extends PackageLoopingCommand {
         printError('$examplePath ($platformString) failed analysis.');
         passing = false;
       }
+
+      print('Removing Swift Package Manager override...');
+      setSwiftPackageManagerState(example, enabled: null);
     }
     return passing;
   }
