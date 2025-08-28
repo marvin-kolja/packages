@@ -265,8 +265,7 @@ class MockCameraPlugin : public CameraPlugin {
   MockCameraPlugin(flutter::TextureRegistrar* texture_registrar,
                    flutter::BinaryMessenger* messenger,
                    std::unique_ptr<CameraFactory> camera_factory)
-      : CameraPlugin(texture_registrar, messenger, std::move(camera_factory)) {
-        }
+      : CameraPlugin(texture_registrar, messenger, std::move(camera_factory)) {}
 
   ~MockCameraPlugin() = default;
 

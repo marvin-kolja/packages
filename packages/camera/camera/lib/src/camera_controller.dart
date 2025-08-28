@@ -32,7 +32,8 @@ Future<List<CameraDescription>> availableCameras() async {
 ///
 /// May throw a [CameraException].
 Future<List<DeviceFormat>> availableCameraFormats(
-    CameraDescription cameraDescription) async {
+  CameraDescription cameraDescription,
+) async {
   return CameraPlatform.instance.getAvailableDeviceFormats(cameraDescription);
 }
 
@@ -66,21 +67,21 @@ class CameraValue {
 
   /// Creates a new camera controller state for an uninitialized controller.
   const CameraValue.uninitialized(CameraDescription description)
-      : this(
-          isInitialized: false,
-          isRecordingVideo: false,
-          isTakingPicture: false,
-          isStreamingImages: false,
-          isRecordingPaused: false,
-          flashMode: FlashMode.auto,
-          exposureMode: ExposureMode.auto,
-          exposurePointSupported: false,
-          focusMode: FocusMode.auto,
-          focusPointSupported: false,
-          deviceOrientation: DeviceOrientation.portraitUp,
-          isPreviewPaused: false,
-          description: description,
-        );
+    : this(
+        isInitialized: false,
+        isRecordingVideo: false,
+        isTakingPicture: false,
+        isStreamingImages: false,
+        isRecordingPaused: false,
+        flashMode: FlashMode.auto,
+        exposureMode: ExposureMode.auto,
+        exposurePointSupported: false,
+        focusMode: FocusMode.auto,
+        focusPointSupported: false,
+        deviceOrientation: DeviceOrientation.portraitUp,
+        isPreviewPaused: false,
+        description: description,
+      );
 
   /// True after [CameraController.initialize] has completed successfully.
   final bool isInitialized;
@@ -195,17 +196,20 @@ class CameraValue {
           exposurePointSupported ?? this.exposurePointSupported,
       focusPointSupported: focusPointSupported ?? this.focusPointSupported,
       deviceOrientation: deviceOrientation ?? this.deviceOrientation,
-      lockedCaptureOrientation: lockedCaptureOrientation == null
-          ? this.lockedCaptureOrientation
-          : lockedCaptureOrientation.orNull,
-      recordingOrientation: recordingOrientation == null
-          ? this.recordingOrientation
-          : recordingOrientation.orNull,
+      lockedCaptureOrientation:
+          lockedCaptureOrientation == null
+              ? this.lockedCaptureOrientation
+              : lockedCaptureOrientation.orNull,
+      recordingOrientation:
+          recordingOrientation == null
+              ? this.recordingOrientation
+              : recordingOrientation.orNull,
       isPreviewPaused: isPreviewPaused ?? this.isPreviewPaused,
       description: description ?? this.description,
-      previewPauseOrientation: previewPauseOrientation == null
-          ? this.previewPauseOrientation
-          : previewPauseOrientation.orNull,
+      previewPauseOrientation:
+          previewPauseOrientation == null
+              ? this.previewPauseOrientation
+              : previewPauseOrientation.orNull,
     );
   }
 
@@ -257,14 +261,14 @@ class CameraController extends ValueNotifier<CameraValue> {
     int? videoBitrate,
     int? audioBitrate,
     this.imageFormatGroup,
-  })  : mediaSettings = MediaSettings(
-          resolutionPreset: resolutionPreset,
-          enableAudio: enableAudio,
-          fps: fps,
-          videoBitrate: videoBitrate,
-          audioBitrate: audioBitrate,
-        ),
-        super(CameraValue.uninitialized(description));
+  }) : mediaSettings = MediaSettings(
+         resolutionPreset: resolutionPreset,
+         enableAudio: enableAudio,
+         fps: fps,
+         videoBitrate: videoBitrate,
+         audioBitrate: audioBitrate,
+       ),
+       super(CameraValue.uninitialized(description));
 
   /// The properties of the camera device controlled by this controller.
   CameraDescription get description => value.description;
@@ -307,7 +311,7 @@ class CameraController extends ValueNotifier<CameraValue> {
   // this value is null.
   Future<void>? _initializeFuture;
   StreamSubscription<DeviceOrientationChangedEvent>?
-      _deviceOrientationSubscription;
+  _deviceOrientationSubscription;
 
   /// Checks whether [CameraController.dispose] has completed successfully.
   ///
@@ -345,8 +349,8 @@ class CameraController extends ValueNotifier<CameraValue> {
       _deviceOrientationSubscription ??= CameraPlatform.instance
           .onDeviceOrientationChanged()
           .listen((DeviceOrientationChangedEvent event) {
-        value = value.copyWith(deviceOrientation: event.orientation);
-      });
+            value = value.copyWith(deviceOrientation: event.orientation);
+          });
 
       _cameraId = await CameraPlatform.instance.createCameraWithSettings(
         description,
@@ -518,8 +522,8 @@ class CameraController extends ValueNotifier<CameraValue> {
       _imageStreamSubscription = CameraPlatform.instance
           .onStreamedFrameAvailable(_cameraId)
           .listen((CameraImageData imageData) {
-        onAvailable(CameraImage.fromPlatformInterface(imageData));
-      });
+            onAvailable(CameraImage.fromPlatformInterface(imageData));
+          });
       value = value.copyWith(isStreamingImages: true);
     } on PlatformException catch (e) {
       throw CameraException(e.code, e.message);
